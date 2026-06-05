@@ -514,7 +514,7 @@ Internal rejection reason is logged server-side but never returned to the client
 
 | Version | Date | Author | Changes |
 |---|---|---|---|
-| 1.0 | 2026-06-05 | Principal Security Architect | Initial proposal aligned with reference implementation |
+| 1.0 | 2026-06-05 | Aung | Initial proposal aligned with reference implementation |
 
 ---
 
