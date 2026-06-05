@@ -2,6 +2,8 @@
 
 This document explains how the LangGraph MCP EKS platform is designed, how a request flows through the system, and the security decisions behind each layer.
 
+> **Audience note:** For the full stakeholder-facing security proposal (executive summary, threat model, STRIDE analysis, production checklist), see [AI_PLATFORM_SECURITY_ARCHITECTURE_PROPOSAL.md](AI_PLATFORM_SECURITY_ARCHITECTURE_PROPOSAL.md).
+
 ---
 
 ## System Overview
@@ -154,6 +156,8 @@ Defense is layered — no single check is relied on alone.
 ---
 
 ## Design Trade-offs
+
+For the full trade-off analysis with decision rationale, see the [Security Architecture Proposal — Section 8](AI_PLATFORM_SECURITY_ARCHITECTURE_PROPOSAL.md#8-design-trade-offs).
 
 ### LangGraph vs direct LLM calls
 

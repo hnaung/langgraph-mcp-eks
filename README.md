@@ -15,8 +15,11 @@ This repository is meant for teams who want to:
 - **Learn** how to design agentic AI systems that are safe to run in production
 - **Prototype** multi-step AI workflows (plan → tool call → respond) with real infrastructure patterns
 - **Develop with Cursor** — use the IDE's MCP integration to build and test tools while coding
+- **Review** a complete security architecture proposal for stakeholder and audit audiences
 
 It is a **working demo and blueprint**, not a drop-in SaaS product. You can fork it, swap tools, plug in your own LLM endpoints, and extend the Kubernetes manifests for your environment.
+
+**For security reviewers and stakeholders:** read the [Security Architecture Proposal](docs/AI_PLATFORM_SECURITY_ARCHITECTURE_PROPOSAL.md) — the audience-facing document explaining the threat model, six-layer defense, and design trade-offs.
 
 ---
 
@@ -120,11 +123,13 @@ pytest tests/ -v
 
 ## Documentation
 
-| Document | Description |
-|---|---|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, request lifecycle, security layers, deployment topology |
-| [docs/CURSOR_DEVELOPMENT.md](docs/CURSOR_DEVELOPMENT.md) | How to use Cursor for MCP tool development on this project |
-| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | EKS deployment steps and production checklist |
+| Document | Audience | Description |
+|---|---|---|
+| [docs/AI_PLATFORM_SECURITY_ARCHITECTURE_PROPOSAL.md](docs/AI_PLATFORM_SECURITY_ARCHITECTURE_PROPOSAL.md) | Executives, security, architects | Full security architecture proposal — threat model, controls, trade-offs |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Engineers | System design, request lifecycle, security layers |
+| [docs/CURSOR_DEVELOPMENT.md](docs/CURSOR_DEVELOPMENT.md) | Developers | How to use Cursor for MCP tool development |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Platform / SRE | EKS deployment steps and production checklist |
+| [docs/README.md](docs/README.md) | All | Documentation index and reading guide by role |
 
 ---
 
@@ -140,6 +145,12 @@ langgraph-mcp-eks/
 ├── main.py                   # FastAPI REST API
 ├── tests/
 │   └── test_security.py      # Prompt injection, hop limits, input validation
+├── docs/
+│   ├── AI_PLATFORM_SECURITY_ARCHITECTURE_PROPOSAL.md  # Audience-facing proposal
+│   ├── ARCHITECTURE.md       # Technical architecture
+│   ├── CURSOR_DEVELOPMENT.md # Cursor IDE development guide
+│   ├── DEPLOYMENT.md         # EKS deployment guide
+│   └── source/               # Original Word/PDF source documents
 ├── k8s/                      # Kubernetes manifests
 ├── iam/                      # IRSA policy
 ├── helm/                     # Helm chart values
@@ -158,7 +169,7 @@ langgraph-mcp-eks/
 | Control | Implementation |
 |---|---|
 | No static AWS credentials | IRSA — pods assume IAM roles via OIDC |
-| Prompt injection defense | Regex patterns, length limits, tool hop cap (5), schema validation |
+| Prompt injection defense | Six layers — see [Security Proposal](docs/AI_PLATFORM_SECURITY_ARCHITECTURE_PROPOSAL.md) |
 | Tool access | Explicit allowlist in `agent/tools.py` — LLM cannot call arbitrary code |
 | Container hardening | Non-root UID 1001, read-only root FS, dropped capabilities, seccomp |
 | Network isolation | NetworkPolicy default-deny, Istio mTLS (production) |
