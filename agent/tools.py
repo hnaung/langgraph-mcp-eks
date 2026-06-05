@@ -11,6 +11,11 @@ logger = logging.getLogger("agent.tools")
 
 def _get_secret(secret_id: str) -> dict:
     """Retrieve secret from AWS Secrets Manager via IRSA — no static creds."""
+    if secret_id == "prod/weather/api-key":
+        local_key = os.environ.get("OPENWEATHER_API_KEY")
+        if local_key:
+            return {"api_key": local_key}
+
     client = boto3.client("secretsmanager", region_name="ap-southeast-1")
     response = client.get_secret_value(SecretId=secret_id)
     return json.loads(response["SecretString"])
