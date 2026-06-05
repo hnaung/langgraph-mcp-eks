@@ -1,0 +1,21 @@
+# Secrets and credentials — never expose to AI context
+**/.env
+**/.env.*
+**/credentials.json
+**/secrets.json
+**/*.pem
+**/*.key
+**/id_rsa
+**/id_rsa.pub
+
+# IAM and deployment secrets
+iam/
+helm/values-prod.yaml
+
+# Build artifacts and caches
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+dist/
+build/

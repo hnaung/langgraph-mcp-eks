@@ -109,6 +109,7 @@ cd langgraph-mcp-eks
 pip install -r requirements.txt
 
 # 2. Set environment (local only — prod uses Secrets Manager)
+cp .env.example .env
 export AWS_REGION=ap-southeast-1
 export OPENWEATHER_API_KEY=your_key_here  # local dev only
 
@@ -123,6 +124,28 @@ curl -X POST http://localhost:8080/v1/query \
   -H "Content-Type: application/json" \
   -d '{"query": "What is the weather in Singapore?"}'
 ```
+
+### Cursor IDE Development
+
+This project includes Cursor configuration for local MCP tool development:
+
+1. **Install dependencies** — `pip install -r requirements.txt`
+2. **Configure secrets** — copy `.env.example` to `.env` and set `OPENWEATHER_API_KEY`
+3. **MCP server** — `.cursor/mcp.json` registers the weather MCP server via stdio transport
+4. **Restart Cursor** — after changing `.cursor/mcp.json`, reload the window or restart Cursor
+5. **Verify** — open **Settings → Features → Model Context Protocol** and confirm `weather-server` is connected
+
+The weather MCP server is available in Cursor chat as a tool. Cursor spawns it on demand using:
+
+```json
+{
+  "command": "python3",
+  "args": ["${workspaceFolder}/mcp_server/weather_server.py"],
+  "envFile": "${workspaceFolder}/.env"
+}
+```
+
+Sensitive files are excluded from AI context via `.cursorignore` (`.env`, IAM policies, production Helm values).
 
 ---
 
