@@ -1,0 +1,33 @@
+replicaCount: 2
+image:
+  repository: "123456789.dkr.ecr.ap-southeast-1.amazonaws.com/langgraph-agent"
+  pullPolicy: Never      # Only pull from ECR, never DockerHub
+  tag: ""               # Always overridden by CI with sha256 digest
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  seccompProfile: {type: RuntimeDefault}
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities: {drop: [ALL]}
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:...
+
+autoscaling:
+  enabled: true
+  minReplicas: 2    # HA — never single point of failure
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1   # Maintain uptime during node drain

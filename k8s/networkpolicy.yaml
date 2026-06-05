@@ -1,0 +1,28 @@
+# Default deny all ingress/egress — explicit allow only
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: agent-netpol
+  namespace: ai-workloads
+spec:
+  podSelector:
+    matchLabels: {app: langgraph-agent}
+  policyTypes: [Ingress, Egress]
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels: {app: ingress-nginx}   # Only from ALB ingress
+    ports:
+    - port: 8080
+  egress:
+  - to:
+    - podSelector:
+        matchLabels: {app: mcp-weather-server}  # Only to MCP servers
+    ports:
+    - port: 9000
+  - to:                                          # AWS APIs via VPC endpoint
+    - ipBlock:
+        cidr: 169.254.169.254/32               # IMDS (IRSA credential path)
+  - ports:
+    - port: 443
+      protocol: TCP                             # HTTPS to Bedrock via VPC endpoint

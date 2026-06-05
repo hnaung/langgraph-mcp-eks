@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: langgraph-agent
+  namespace: ai-workloads
+  labels:
+    app: langgraph-agent
+spec:
+  type: ClusterIP          # Internal only — exposed via ALB Ingress, not directly
+  selector:
+    app: langgraph-agent
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP

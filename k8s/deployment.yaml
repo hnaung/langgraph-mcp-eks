@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langgraph-agent
+  namespace: ai-workloads
+  labels:
+    app: langgraph-agent
+    security.compliance: enforced
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: langgraph-agent}
+  template:
+    metadata:
+      annotations:
+        # Istio sidecar for mTLS east-west traffic
+        sidecar.istio.io/inject: "true"
+    spec:
+      # IRSA — pod assumes IAM role via OIDC, no static creds
+      serviceAccountName: langgraph-agent-sa
+      automountServiceAccountToken: false
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 2000
+        seccompProfile:
+          type: RuntimeDefault    # Block 300+ syscalls by default
+
+      containers:
+      - name: agent
+        image: "123456789.dkr.ecr.ap-southeast-1.amazonaws.com/langgraph-agent:sha256-abc123"
+        # Pinned by digest — not :latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests: {cpu: "250m", memory: "512Mi"}
+          limits: {cpu: "1", memory: "1Gi"}   # Prevents resource exhaustion
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true    # Blocks runtime code injection
+          capabilities:
+            drop: ["ALL"]               # Drop all Linux capabilities
+
+        env:
+        - name: AWS_REGION
+          value: ap-southeast-1
+        # No secrets in env vars — fetched from Secrets Manager at runtime
+
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp           # Writable tmpfs — isolated from container FS
+
+        livenessProbe:
+          httpGet: {path: /health, port: 8080}
+          initialDelaySeconds: 15
+        readinessProbe:
+          httpGet: {path: /ready, port: 8080}
+          initialDelaySeconds: 10
+
+      volumes:
+      - name: tmp
+        emptyDir: {medium: Memory}  # RAM-backed, not disk

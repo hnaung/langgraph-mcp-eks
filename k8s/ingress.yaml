@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: langgraph-agent
+  namespace: ai-workloads
+  annotations:
+    # ALB Ingress Controller
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+
+    # TLS — TLS 1.3 preferred, 1.2 minimum
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:123456789:certificate/xxx
+
+    # WAF — attach managed rule groups
+    alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:ap-southeast-1:123456789:regional/webacl/ai-platform-waf/xxx
+
+    # Security headers
+    alb.ingress.kubernetes.io/actions.response-headers: |
+      {"Type":"forward","TargetGroupArn":"...","ResponseHeaders":{"Strict-Transport-Security":"max-age=31536000; includeSubDomains","X-Frame-Options":"DENY","X-Content-Type-Options":"nosniff"}}
+
+    # Rate limiting handled by WAF rule — see WAF config
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=60
+
+    # Access logs to S3
+    alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=ai-platform-alb-logs
+spec:
+  rules:
+    - host: agent.company.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: langgraph-agent
+                port:
+                  number: 80
