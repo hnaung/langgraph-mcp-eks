@@ -1,7 +1,6 @@
 # Agentic AI Platform — AWS EKS
 ### LangGraph + Model Context Protocol (MCP) + Kubernetes
 
-> **Principal Security Architect Assessment**
 > Demonstrates production-grade agentic AI deployment with security-first design on AWS EKS.
 
 ---
